@@ -66,9 +66,16 @@ class Company
     #[ORM\JoinTable(name: 'user_info_company')]
     private Collection $userInfo;
 
+    /**
+     * @var Collection<int, Reservation>
+     */
+    #[ORM\OneToMany(targetEntity: Reservation::class, mappedBy: 'companyId')]
+    private Collection $reservations;
+
     public function __construct()
     {
         $this->userInfo = new ArrayCollection();
+        $this->reservations = new ArrayCollection();
     }
 
     public function getUserInfo(): Collection
@@ -196,6 +203,36 @@ class Company
     public function removeActivity(Activity $activity): static
     {
         $this->activities->removeElement($activity);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Reservation>
+     */
+    public function getReservations(): Collection
+    {
+        return $this->reservations;
+    }
+
+    public function addReservation(Reservation $reservation): static
+    {
+        if (!$this->reservations->contains($reservation)) {
+            $this->reservations->add($reservation);
+            $reservation->setCompanyId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReservation(Reservation $reservation): static
+    {
+        if ($this->reservations->removeElement($reservation)) {
+            // set the owning side to null (unless already changed)
+            if ($reservation->getCompanyId() === $this) {
+                $reservation->setCompanyId(null);
+            }
+        }
 
         return $this;
     }

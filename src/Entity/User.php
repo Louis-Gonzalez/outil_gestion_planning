@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
 use App\Entity\Traits\DatetimeTrait;
@@ -52,6 +54,24 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column]
     private bool $isVerified = false;
+
+    /**
+     * @var Collection<int, Place>
+     */
+    #[ORM\OneToMany(targetEntity: Place::class, mappedBy: 'person_in_charge')]
+    private Collection $placesInCharge;
+
+    /**
+     * @var Collection<int, Reservation>
+     */
+    #[ORM\OneToMany(targetEntity: Reservation::class, mappedBy: 'userId')]
+    private Collection $reservations;
+
+    public function __construct()
+    {
+        $this->placesInCharge = new ArrayCollection();
+        $this->reservations = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -147,6 +167,66 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setVerified(bool $isVerified): static
     {
         $this->isVerified = $isVerified;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Place>
+     */
+    public function getPlacesInCharge(): Collection
+    {
+        return $this->placesInCharge;
+    }
+
+    public function addPlacesInCharge(Place $placesInCharge): static
+    {
+        if (!$this->placesInCharge->contains($placesInCharge)) {
+            $this->placesInCharge->add($placesInCharge);
+            $placesInCharge->setPersonInCharge($this);
+        }
+
+        return $this;
+    }
+
+    public function removePlacesInCharge(Place $placesInCharge): static
+    {
+        if ($this->placesInCharge->removeElement($placesInCharge)) {
+            // set the owning side to null (unless already changed)
+            if ($placesInCharge->getPersonInCharge() === $this) {
+                $placesInCharge->setPersonInCharge(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Reservation>
+     */
+    public function getReservations(): Collection
+    {
+        return $this->reservations;
+    }
+
+    public function addReservation(Reservation $reservation): static
+    {
+        if (!$this->reservations->contains($reservation)) {
+            $this->reservations->add($reservation);
+            $reservation->setUserId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReservation(Reservation $reservation): static
+    {
+        if ($this->reservations->removeElement($reservation)) {
+            // set the owning side to null (unless already changed)
+            if ($reservation->getUserId() === $this) {
+                $reservation->setUserId(null);
+            }
+        }
+
         return $this;
     }
 }
