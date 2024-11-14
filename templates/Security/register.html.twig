@@ -1,0 +1,20 @@
+{% extends "base.html.twig" %}
+
+{% block title %}
+    | S'inscrire
+    {{ parent()}}
+{% endblock %}
+
+{% block metatags %}
+    <meta name="title" content="Enregistrement | Blog-Pierre" />
+    <meta name="description" content="Formulaire d'enregistrement test de Pierre"/>
+    <meta name="robots" content="no-index" /> {# no-index : pour ne pas apparaitre et index : pour apparaitre #}
+{% endblock %}
+
+{% block body %}
+    <h1>S'inscrire</h1>
+    {{form_start(form)}}
+    {{form_widget(form)}}
+        <button type="submit">S'inscrire</button>
+    {{form_end(form)}}
+{% endblock %}
