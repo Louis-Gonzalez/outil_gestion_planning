@@ -4,8 +4,11 @@ namespace App\Entity;
 
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use App\Entity\Company;
 use App\Entity\Traits\DatetimeTrait;
 use App\Repository\UserInfoRepository;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserInfoRepository::class)]
@@ -54,6 +57,35 @@ class UserInfo
     #[ORM\OneToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id', nullable: true)]
     private ?User $user = null;
+
+    // je veux créer une relation beetween UserInfo and Comapny(id)
+    // pour qu'un utilisateur peut avoir plusieurs entreprises de type ManyToMany
+    #[ORM\ManyToMany(targetEntity: Company::class, mappedBy: 'userInfo')]
+    private Collection $companies;
+
+    public function __construct()
+    {
+        $this->companies = new ArrayCollection();
+    }
+
+    public function getCompanies(): Collection
+    {
+        return $this->companies;
+    }
+
+    public function addCompany(Company $company): self
+    {
+        if (!$this->companies->contains($company)) {
+            $this->companies->add($company);
+        }
+        return $this;
+    }
+
+    public function removeCompany(Company $company): self
+    {
+        $this->companies->removeElement($company);
+        return $this;
+    }
 
     public function getId(): ?int
     {

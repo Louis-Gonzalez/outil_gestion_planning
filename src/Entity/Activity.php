@@ -3,8 +3,11 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use App\Entity\Company;
 use App\Entity\Traits\DatetimeTrait;
 use App\Repository\ActivityRepository;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ActivityRepository::class)]
@@ -34,6 +37,35 @@ class Activity
     #[Assert\Length(max: 80)]
     private ?string $status = null;
 
+    #[ORM\ManyToMany(targetEntity: Company::class, mappedBy: 'activities')]
+    private Collection $companies;
+    
+    public function __construct()
+    {
+        $this->companies = new ArrayCollection();
+    }
+
+    public function getCompanies(): Collection
+    {
+        return $this->companies;
+    }
+
+    public function addCompany(Company $company): self
+    {
+        if (!$this->companies->contains($company)) {
+            $this->companies->add($company);
+        }
+
+        return $this;
+    }
+
+    public function removeCompany(Company $company): self
+    {
+        $this->companies->removeElement($company);
+
+        return $this;
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -47,7 +79,6 @@ class Activity
     public function setName(string $name): static
     {
         $this->name = $name;
-
         return $this;
     }
 
@@ -59,7 +90,6 @@ class Activity
     public function setType(string $type): static
     {
         $this->type = $type;
-
         return $this;
     }
 
@@ -71,7 +101,6 @@ class Activity
     public function setStatus(string $status): static
     {
         $this->status = $status;
-
         return $this;
     }
 }

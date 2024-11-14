@@ -3,8 +3,12 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use App\Entity\Activity;
+use App\Entity\UserInfo;
 use App\Entity\Traits\DatetimeTrait;
 use App\Repository\CompanyRepository;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: CompanyRepository::class)]
@@ -54,12 +58,37 @@ class Company
     #[Assert\Length(max: 255)]
     private ?string $email = null;
 
-    #[ORM\ManyToOne(targetEntity: Activity::class)]
-    #[ORM\JoinColumn(name: 'activity_id', referencedColumnName: 'id', nullable: false)]
-    private ?Activity $activity = null;
+    #[ORM\ManyToMany(targetEntity: Activity::class, inversedBy: 'companies')]
+    #[ORM\JoinTable(name: 'company_activity')]
+    private Collection $activities;
 
-    // #[ORM\Column]
-    // private ?int $activity_id = null;
+    #[ORM\ManyToMany(targetEntity: UserInfo::class, inversedBy: 'companies')]
+    #[ORM\JoinTable(name: 'user_info_company')]
+    private Collection $userInfo;
+
+    public function __construct()
+    {
+        $this->userInfo = new ArrayCollection();
+    }
+
+    public function getUserInfo(): Collection
+    {
+        return $this->userInfo;
+    }
+
+    public function addUserInfo(UserInfo $userInfo): self
+    {
+        if (!$this->userInfo->contains($userInfo)) {
+            $this->userInfo->add($userInfo);
+        }
+        return $this;
+    }
+
+    public function removeUserInfo(UserInfo $userInfo): self
+    {
+        $this->userInfo->removeElement($userInfo);
+        return $this;
+    }
 
     public function getId(): ?int
     {
@@ -150,26 +179,25 @@ class Company
         return $this;
     }
 
-    // public function getActivityId(): ?int
-    // {
-    //     return $this->activity_id;
-    // }
-
-    // public function setActivityId(int $activity_id): static
-    // {
-    //     $this->activity_id = $activity_id;
-
-    //     return $this;
-    // }
-    public function setActivity(?Activity $activity): static
+    public function getActivities(): \Doctrine\Common\Collections\Collection
     {
-        $this->activity = $activity;
+        return $this->activities;
+    }
+
+    public function addActivity(Activity $activity): static
+    {
+        if (!$this->activities->contains($activity)) {
+            $this->activities->add($activity);
+        }
 
         return $this;
     }
-    public function getActivityId(): ?int
+
+    public function removeActivity(Activity $activity): static
     {
-        return $this->activity ? $this->activity->getId() : null;
+        $this->activities->removeElement($activity);
+
+        return $this;
     }
 
 }
