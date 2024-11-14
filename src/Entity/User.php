@@ -12,7 +12,10 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
-#[UniqueEntity(fields: ['email'], message: 'Cette adresse email est déjà utilisée.')]
+#[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_USERNAME', fields: ['username'])]
+#[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_USERNAME_EMAIL', fields: ['username', 'email'])]
+#[UniqueEntity(fields: ['email'], message: 'This email address is already in use.')]
+#[UniqueEntity(fields: ['username'], message: 'This username is already in use.')]
 #[ORM\HasLifecycleCallbacks]
 
 class User implements UserInterface, PasswordAuthenticatedUserInterface
@@ -24,10 +27,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 180)]
+    #[ORM\Column(length: 255)]
     #[Assert\NotBlank]
     #[Assert\Email]
-    #[Assert\Length(max: 180)]
+    #[Assert\Length(max: 255)]
     private ?string $email = null;
 
     /**
@@ -45,12 +48,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank]
     #[Assert\Length(max: 255)]
-    private ?string $firstName = null;
-
-    #[ORM\Column(length: 255)]
-    #[Assert\NotBlank]
-    #[Assert\Length(max: 255)]
-    private ?string $lastName = null;
+    private ?string $username = null;
 
     #[ORM\Column]
     private bool $isVerified = false;
@@ -130,27 +128,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         // $this->plainPassword = null;
     }
 
-    public function getFirstName(): ?string
+    public function getUsername(): ?string
     {
-        return $this->firstName;
+        return $this->username;
     }
 
-    public function setFirstName(string $firstName): static
+    public function setUsername(string $username): static
     {
-        $this->firstName = $firstName;
-
-        return $this;
-    }
-
-    public function getLastName(): ?string
-    {
-        return $this->lastName;
-    }
-
-    public function setLastName(string $lastName): static
-    {
-        $this->lastName = $lastName;
-
+        $this->username = $username;
         return $this;
     }
 
@@ -162,7 +147,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setVerified(bool $isVerified): static
     {
         $this->isVerified = $isVerified;
-
         return $this;
     }
 }
