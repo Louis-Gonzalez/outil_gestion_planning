@@ -39,6 +39,10 @@ class Schedule
     #[ORM\Column(length: 80)]
     private ?string $status = null;
 
+    #[ORM\ManyToOne(targetEntity: Date::class, inversedBy: 'schedules')]
+    #[ORM\JoinColumn(nullable: false)]
+    private Date $date;
+
     /**
      * @var Collection<int, Reservation>
      */
